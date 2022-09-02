@@ -1,12 +1,18 @@
 package com.example.weatherapp.ui.component.weather
 
+import android.Manifest.permission
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.core.app.ActivityCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.LiveData
+import com.example.weatherapp.R
 import com.example.weatherapp.R.drawable
 import com.example.weatherapp.data.Resource
 import com.example.weatherapp.data.dto.weathor.WeatherItem
@@ -14,6 +20,7 @@ import com.example.weatherapp.data.dto.weathor.Weathers
 import com.example.weatherapp.data.error.SEARCH_ERROR
 import com.example.weatherapp.databinding.ActivityWeatherBinding
 import com.example.weatherapp.ui.base.BaseActivity
+import com.example.weatherapp.utils.PermissionUtils
 import com.example.weatherapp.utils.SingleEvent
 import com.example.weatherapp.utils.observe
 import com.example.weatherapp.utils.observeEvent
@@ -23,6 +30,10 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.DateFormat
@@ -260,7 +271,6 @@ class WeatherActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        weathersListViewModel.getWeathers()
 
         initChartMax()
         initCharMin()
@@ -341,13 +351,6 @@ class WeatherActivity : BaseActivity() {
     }
 
     private fun setMaxData(count: Int, values: ArrayList<Entry>) {
-//        val values = ArrayList<Entry>()
-//        values.add(Entry(1f, 32f, ResourcesCompat.getDrawable(resources, R.drawable.ic_baseline_circle_24, theme)))
-//        values.add(Entry(2f, 31f, ResourcesCompat.getDrawable(resources, R.drawable.ic_baseline_circle_24, theme)))
-//        values.add(Entry(3f, 28f, ResourcesCompat.getDrawable(resources, R.drawable.ic_baseline_circle_24, theme)))
-//        values.add(Entry(4f, 32f, ResourcesCompat.getDrawable(resources, R.drawable.ic_baseline_circle_24, theme)))
-//        values.add(Entry(5f, 30f, ResourcesCompat.getDrawable(resources, R.drawable.ic_baseline_circle_24, theme)))
-
         val set: LineDataSet
         if (binding.chartMax.data != null && binding.chartMax.data.dataSetCount > 0) {
             set = binding.chartMax.data.getDataSetByIndex(0) as LineDataSet
@@ -432,5 +435,92 @@ class WeatherActivity : BaseActivity() {
             // set data
             binding.chartMin.data = data
         }
+    }
+
+    private fun setUpLocationListener() {
+        val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+        // for getting the current location update after every 2 seconds with high accuracy
+        val locationRequest = LocationRequest().setInterval(2000).setFastestInterval(2000)
+            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+
+            return
+        }
+        fusedLocationProviderClient.requestLocationUpdates(
+            locationRequest,
+            object : LocationCallback() {
+                override fun onLocationResult(locationResult: LocationResult) {
+                    super.onLocationResult(locationResult)
+                    for (location in locationResult.locations) {
+                        weathersListViewModel.getWeathers()
+                    }
+                    // Few more things we can do here:
+                    // For example: Update the location of user on server
+                }
+            },
+            Looper.myLooper()
+        )
+    }
+
+    override fun onStart() {
+        super.onStart()
+        when {
+            PermissionUtils.isAccessFineLocationGranted(this) -> {
+                when {
+                    PermissionUtils.isLocationEnabled(this) -> {
+                        setUpLocationListener()
+                    }
+                    else -> {
+                        PermissionUtils.showGPSNotEnabledDialog(this)
+                    }
+                }
+            }
+            else -> {
+                PermissionUtils.requestAccessFineLocationPermission(
+                    this,
+                    LOCATION_PERMISSION_REQUEST_CODE
+                )
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            LOCATION_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    when {
+                        PermissionUtils.isLocationEnabled(this) -> {
+                            setUpLocationListener()
+                        }
+                        else -> {
+                            PermissionUtils.showGPSNotEnabledDialog(this)
+                        }
+                    }
+                } else {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.location_permission_not_granted),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
+    }
+
+    companion object {
+
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 999
     }
 }

@@ -103,6 +103,8 @@ dependencies {
     kaptAndroidTest "com.google.dagger:hilt-android-compiler:$hilt_version"
     // Graph
     implementation "com.github.PhilJay:MPAndroidChart:$lineGraph"
+    // User Location Service
+    implementation "com.google.android.gms:play-services-location:$servicesLocation"
 }
 
 kapt {

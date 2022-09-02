@@ -55,4 +55,5 @@ ext {
     picassoVersion = '2.71828'
     livedata_ktx='2.5.1'
     lineGraph = 'v3.1.0'
+    servicesLocation='20.0.0'
 }
