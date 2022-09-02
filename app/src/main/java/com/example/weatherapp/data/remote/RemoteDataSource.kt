@@ -5,5 +5,5 @@ import com.example.weatherapp.data.dto.weathor.Weathers
 
 internal interface RemoteDataSource {
 
-    suspend fun requestWeathers(): Resource<Weathers>
+    suspend fun requestWeathers(lat: Double, log: Double): Resource<Weathers>
 }

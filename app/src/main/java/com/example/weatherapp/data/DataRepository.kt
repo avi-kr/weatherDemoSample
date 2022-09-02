@@ -21,9 +21,9 @@ class DataRepository @Inject constructor(
     private val ioDispatcher: CoroutineContext
 ) : DataRepositorySource {
 
-    override suspend fun requestWeathers(): Flow<Resource<Weathers>> {
+    override suspend fun requestWeathers(lat: Double, log: Double): Flow<Resource<Weathers>> {
         return flow {
-            emit(remoteRepository.requestWeathers())
+            emit(remoteRepository.requestWeathers(lat, log))
         }.flowOn(ioDispatcher)
     }
 

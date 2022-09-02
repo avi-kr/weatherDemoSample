@@ -11,6 +11,6 @@ import kotlinx.coroutines.flow.Flow
  */
 interface DataRepositorySource {
 
-    suspend fun requestWeathers(): Flow<Resource<Weathers>>
+    suspend fun requestWeathers(lat: Double, log: Double): Flow<Resource<Weathers>>
     suspend fun doLogin(loginRequest: LoginRequest): Flow<Resource<LoginResponse>>
 }

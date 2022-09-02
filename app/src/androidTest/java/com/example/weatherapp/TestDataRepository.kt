@@ -8,6 +8,7 @@ import com.example.weatherapp.data.Resource.DataError
 import com.example.weatherapp.data.Resource.Success
 import com.example.weatherapp.data.dto.login.LoginRequest
 import com.example.weatherapp.data.dto.login.LoginResponse
+import com.example.weatherapp.data.dto.weathor.WeatherCity
 import com.example.weatherapp.data.dto.weathor.Weathers
 import com.example.weatherapp.data.error.NETWORK_ERROR
 import kotlinx.coroutines.flow.Flow
@@ -20,7 +21,7 @@ import javax.inject.Inject
  */
 class TestDataRepository @Inject constructor() : DataRepositorySource {
 
-    override suspend fun requestWeathers(): Flow<Resource<Weathers>> {
+    override suspend fun requestWeathers(lat: Double, log: Double): Flow<Resource<Weathers>> {
         return when (dataStatus) {
             DataStatus.Success -> {
                 flow { emit(Success(initData())) }
@@ -29,7 +30,7 @@ class TestDataRepository @Inject constructor() : DataRepositorySource {
                 flow { emit(DataError(errorCode = NETWORK_ERROR)) }
             }
             DataStatus.EmptyResponse -> {
-                flow { emit(Success(Weathers(arrayListOf()))) }
+                flow { emit(Success(Weathers(arrayListOf(), WeatherCity("")))) }
             }
         }
     }

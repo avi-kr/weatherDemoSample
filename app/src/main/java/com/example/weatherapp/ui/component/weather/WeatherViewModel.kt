@@ -60,11 +60,11 @@ constructor(private val dataRepositoryRepository: DataRepositorySource) : BaseVi
     val showToast: LiveData<SingleEvent<Any>> get() = showToastPrivate
 
 
-    fun getWeathers() {
+    fun getWeathers(lat: Double, log: Double) {
         viewModelScope.launch {
             weathersLiveDataPrivate.value = Resource.Loading()
             wrapEspressoIdlingResource {
-                dataRepositoryRepository.requestWeathers().collect {
+                dataRepositoryRepository.requestWeathers(lat, log).collect {
                     weathersLiveDataPrivate.value = it
                 }
             }

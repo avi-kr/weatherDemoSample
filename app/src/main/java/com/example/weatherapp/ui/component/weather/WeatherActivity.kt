@@ -440,7 +440,7 @@ class WeatherActivity : BaseActivity() {
     private fun setUpLocationListener() {
         val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         // for getting the current location update after every 2 seconds with high accuracy
-        val locationRequest = LocationRequest().setInterval(2000).setFastestInterval(2000)
+        val locationRequest = LocationRequest().setInterval(10000).setFastestInterval(10000)
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -459,7 +459,7 @@ class WeatherActivity : BaseActivity() {
                 override fun onLocationResult(locationResult: LocationResult) {
                     super.onLocationResult(locationResult)
                     for (location in locationResult.locations) {
-                        weathersListViewModel.getWeathers()
+                        weathersListViewModel.getWeathers(location.latitude, location.longitude)
                     }
                     // Few more things we can do here:
                     // For example: Update the location of user on server

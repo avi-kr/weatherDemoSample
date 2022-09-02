@@ -20,9 +20,9 @@ class RemoteData @Inject
 constructor(private val serviceGenerator: ServiceGenerator, private val networkConnectivity: NetworkConnectivity) :
     RemoteDataSource {
 
-    override suspend fun requestWeathers(): Resource<Weathers> {
+    override suspend fun requestWeathers(lat: Double, log: Double): Resource<Weathers> {
         val weathersService = serviceGenerator.createService(WeatherService::class.java)
-        return when (val response = processCall(weathersService::fetchWeathers)) {
+        return when (val response = processCall({ weathersService.fetchWeathers(lat, log) })) {
             is Weathers -> {
                 Resource.Success(data = response)
             }
