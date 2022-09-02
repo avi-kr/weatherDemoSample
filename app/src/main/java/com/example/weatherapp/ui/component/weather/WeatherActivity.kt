@@ -20,6 +20,7 @@ import com.example.weatherapp.data.dto.weathor.Weathers
 import com.example.weatherapp.data.error.SEARCH_ERROR
 import com.example.weatherapp.databinding.ActivityWeatherBinding
 import com.example.weatherapp.ui.base.BaseActivity
+import com.example.weatherapp.utils.DateUtil.convertDateFormat
 import com.example.weatherapp.utils.PermissionUtils
 import com.example.weatherapp.utils.SingleEvent
 import com.example.weatherapp.utils.observe
@@ -144,8 +145,8 @@ class WeatherActivity : BaseActivity() {
             dayTemp.add(mutableList[i].main.temp.toFloat())
         }
 
-        setMaxData(5, maxList)
-        setMinData(5, minList)
+        setMaxData(maxList)
+        setMinData(minList)
 
         val hourlyList: MutableList<String> = mutableListOf()
         mappingTimeWiseWeatherData(mutableList, hourlyList)
@@ -209,20 +210,13 @@ class WeatherActivity : BaseActivity() {
         }
     }
 
-    private fun mappingDayWiseWeatherData(
-        weatherlist: List<WeatherItem>,
-        map: MutableMap<String, MutableList<WeatherItem>>
-    ) {
-        for (item in weatherlist) {
+    private fun mappingDayWiseWeatherData(list: List<WeatherItem>, map: MutableMap<String, MutableList<WeatherItem>>) {
+        for (item in list) {
 
-            val originalFormat: DateFormat = SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.ENGLISH)
-            val targetFormat: DateFormat = SimpleDateFormat("E dd/MM")
-            val date: Date = originalFormat.parse(item.dtTxt)
-            val formattedDate: String = targetFormat.format(date)
-
+            val formattedDate = convertDateFormat("yyyy-MM-dd hh:mm:ss", item.dtTxt, "E dd/MM")
 
             if (map[formattedDate].isNullOrEmpty()) {
-                map[formattedDate] = mutableListOf(item);
+                map[formattedDate] = mutableListOf(item)
             } else {
                 val list = map[formattedDate]!!
                 list.add(item)
@@ -231,17 +225,9 @@ class WeatherActivity : BaseActivity() {
         }
     }
 
-    private fun mappingTimeWiseWeatherData(
-        weatherlist: List<WeatherItem>,
-        hourlyList: MutableList<String>
-    ) {
+    private fun mappingTimeWiseWeatherData(weatherlist: List<WeatherItem>, hourlyList: MutableList<String>) {
         for (item in weatherlist) {
-
-            val originalFormat: DateFormat = SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.ENGLISH)
-            val targetFormat: DateFormat = SimpleDateFormat("hh:mm")
-            val date: Date = originalFormat.parse(item.dtTxt)
-            val formattedDate: String = targetFormat.format(date)
-
+            val formattedDate = convertDateFormat("yyyy-MM-dd hh:mm:ss", item.dtTxt, "hh:mm")
             hourlyList.add(formattedDate)
         }
     }
@@ -271,19 +257,8 @@ class WeatherActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         initChartMax()
         initCharMin()
-
-//        setMaxData(5, 50f)
-//        setMinData(5, 50f)
-        // draw points over time
-        binding.chartMax.animateX(1500)
-        binding.chartMin.animateX(1500)
-        // get the legend (only possible after setting data)
-//        val l: Legend = binding.chartMax.legend
-        // draw legend entries as lines
-//        l.form = LINE
     }
 
     private fun initChartMax() {
@@ -350,7 +325,7 @@ class WeatherActivity : BaseActivity() {
         binding.chartMin.legend.isEnabled = false
     }
 
-    private fun setMaxData(count: Int, values: ArrayList<Entry>) {
+    private fun setMaxData(values: ArrayList<Entry>) {
         val set: LineDataSet
         if (binding.chartMax.data != null && binding.chartMax.data.dataSetCount > 0) {
             set = binding.chartMax.data.getDataSetByIndex(0) as LineDataSet
@@ -390,14 +365,7 @@ class WeatherActivity : BaseActivity() {
         }
     }
 
-    private fun setMinData(count: Int, values: ArrayList<Entry>) {
-//        val values = ArrayList<Entry>()
-//        values.add(Entry(1f, 22f, ResourcesCompat.getDrawable(resources, R.drawable.ic_baseline_circle_24, theme)))
-//        values.add(Entry(2f, 21f, ResourcesCompat.getDrawable(resources, R.drawable.ic_baseline_circle_24, theme)))
-//        values.add(Entry(3f, 18f, ResourcesCompat.getDrawable(resources, R.drawable.ic_baseline_circle_24, theme)))
-//        values.add(Entry(4f, 22f, ResourcesCompat.getDrawable(resources, R.drawable.ic_baseline_circle_24, theme)))
-//        values.add(Entry(5f, 20f, ResourcesCompat.getDrawable(resources, R.drawable.ic_baseline_circle_24, theme)))
-
+    private fun setMinData(values: ArrayList<Entry>) {
         val set: LineDataSet
         if (binding.chartMin.data != null && binding.chartMin.data.dataSetCount > 0) {
             set = binding.chartMin.data.getDataSetByIndex(0) as LineDataSet
