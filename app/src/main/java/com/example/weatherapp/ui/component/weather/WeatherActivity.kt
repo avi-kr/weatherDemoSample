@@ -27,6 +27,8 @@ import com.example.weatherapp.utils.observe
 import com.example.weatherapp.utils.observeEvent
 import com.example.weatherapp.utils.setupSnackbar
 import com.example.weatherapp.utils.showToast
+import com.example.weatherapp.utils.toGone
+import com.example.weatherapp.utils.toVisible
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
@@ -37,10 +39,25 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import kotlinx.android.synthetic.main.main_bottom_info_container.view.humidity
+import kotlinx.android.synthetic.main.main_bottom_info_container.view.probabilityOfPrecipiation
+import kotlinx.android.synthetic.main.main_bottom_info_container.view.visibilityTV
+import kotlinx.android.synthetic.main.main_bottom_info_container.view.windSpeed
+import kotlinx.android.synthetic.main.main_day_time_weather_container.view.hour1
+import kotlinx.android.synthetic.main.main_day_time_weather_container.view.hour2
+import kotlinx.android.synthetic.main.main_day_time_weather_container.view.hour3
+import kotlinx.android.synthetic.main.main_day_time_weather_container.view.hourIcon1
+import kotlinx.android.synthetic.main.main_day_time_weather_container.view.hourIcon2
+import kotlinx.android.synthetic.main.main_day_time_weather_container.view.hourIcon3
+import kotlinx.android.synthetic.main.main_day_time_weather_container.view.temp1
+import kotlinx.android.synthetic.main.main_day_time_weather_container.view.temp2
+import kotlinx.android.synthetic.main.main_day_time_weather_container.view.temp3
+import kotlinx.android.synthetic.main.main_days_container.view.day1
+import kotlinx.android.synthetic.main.main_days_container.view.day2
+import kotlinx.android.synthetic.main.main_days_container.view.day3
+import kotlinx.android.synthetic.main.main_days_container.view.day4
+import kotlinx.android.synthetic.main.main_days_container.view.day5
+import kotlinx.android.synthetic.main.main_days_container.view.day6
 
 @AndroidEntryPoint
 class WeatherActivity : BaseActivity() {
@@ -52,32 +69,20 @@ class WeatherActivity : BaseActivity() {
     private var isDay5Present = false
     private var isDay6Present = false
 
-    var map: MutableMap<String, MutableList<WeatherItem>> = mutableMapOf()
+    private var map: MutableMap<String, MutableList<WeatherItem>> = mutableMapOf()
 
     private lateinit var binding: ActivityWeatherBinding
     private val weathersListViewModel: WeatherViewModel by viewModels()
 
     override fun observeViewModel() {
         observe(weathersListViewModel.weathersLiveData, ::handleWeathersList)
-        observe(weathersListViewModel.noSearchFound, ::noSearchResult)
         observeEvent(weathersListViewModel.openWeatherDetails, ::navigateToDetailsScreen)
         observeSnackBarMessages(weathersListViewModel.showSnackBar)
         observeToast(weathersListViewModel.showToast)
     }
 
     private fun showLoadingView() {
-    }
-
-    private fun showSearchResult(weathersItem: WeatherItem) {
-        weathersListViewModel.openWeatherDetails(weathersItem)
-    }
-
-    private fun noSearchResult(unit: Unit) {
-        showSearchError()
-    }
-
-    private fun showSearchError() {
-        weathersListViewModel.showToastMessage(SEARCH_ERROR)
+        binding.pbLoading.toVisible()
     }
 
     private fun observeSnackBarMessages(event: LiveData<SingleEvent<Any>>) {
@@ -89,11 +94,15 @@ class WeatherActivity : BaseActivity() {
     }
 
     private fun showDataView(show: Boolean) {
+        binding.pbLoading.toGone()
     }
 
     private fun bindWeatherData(weathers: Weathers) {
+        binding.pbLoading.toGone()
+
         val weatherlist = weathers.list
 
+        binding.toolbar.title = weathers.city.name
         map = mutableMapOf()
 
         //map day wise weather data
@@ -103,23 +112,23 @@ class WeatherActivity : BaseActivity() {
     }
 
     private fun initDayClicks() {
-        binding.day1.setOnClickListener {
-            dayWiseData(map[binding.day1.text]!!.toList())
+        binding.root.day1.setOnClickListener {
+            dayWiseData(map[binding.root.day1.text]!!.toList())
         }
-        binding.day2.setOnClickListener {
-            dayWiseData(map[binding.day2.text]!!.toList())
+        binding.root.day2.setOnClickListener {
+            dayWiseData(map[binding.root.day2.text]!!.toList())
         }
-        binding.day3.setOnClickListener {
-            dayWiseData(map[binding.day3.text]!!.toList())
+        binding.root.day3.setOnClickListener {
+            dayWiseData(map[binding.root.day3.text]!!.toList())
         }
-        binding.day4.setOnClickListener {
-            dayWiseData(map[binding.day4.text]!!.toList())
+        binding.root.day4.setOnClickListener {
+            dayWiseData(map[binding.root.day4.text]!!.toList())
         }
-        binding.day5.setOnClickListener {
-            dayWiseData(map[binding.day5.text]!!.toList())
+        binding.root.day5.setOnClickListener {
+            dayWiseData(map[binding.root.day5.text]!!.toList())
         }
-        binding.day6.setOnClickListener {
-            dayWiseData(map[binding.day6.text]!!.toList())
+        binding.root.day6.setOnClickListener {
+            dayWiseData(map[binding.root.day6.text]!!.toList())
         }
     }
 
@@ -156,30 +165,35 @@ class WeatherActivity : BaseActivity() {
         binding.chartMax.animateX(1500)
         binding.chartMin.animateX(1500)
 
-        binding.windSpeed.text = mutableList[0].wind.speed
-        binding.visibility.text = mutableList[0].visibility
-        binding.humidity.text = mutableList[0].main.humidity
-        binding.probabilityOfPrecipiation.text = mutableList[0].pop
+        binding.currentTemp.text = mutableList[0].main.temp.toFloat().toInt().toString()  + "°"
+        binding.weatherCondition.text = mutableList[0].weather[0].main
+        binding.root.windSpeed.text = mutableList[0].wind.speed
+        binding.root.visibilityTV.text = mutableList[0].visibility
+        binding.root.humidity.text = mutableList[0].main.humidity
+        binding.root.probabilityOfPrecipiation.text = mutableList[0].pop
     }
 
     private fun setHourlyData(hourlyList: MutableList<String>, dayTemp: ArrayList<Float>) {
         if (hourlyList.size >= 1) {
-            binding.hour1.text = hourlyList[0]
-            binding.hour1.visibility = View.VISIBLE
-            binding.temp1.text = dayTemp[0].toInt().toString() + "°"
-            binding.temp1.visibility = View.VISIBLE
+            binding.root.hour1.text = hourlyList[0]
+            binding.root.hour1.visibility = View.VISIBLE
+            binding.root.temp1.text = dayTemp[0].toInt().toString() + "°"
+            binding.root.temp1.visibility = View.VISIBLE
+            binding.root.hourIcon1.visibility = View.VISIBLE
         }
         if (hourlyList.size >= 2) {
-            binding.hour2.text = hourlyList[1]
-            binding.hour2.visibility = View.VISIBLE
-            binding.temp2.text = dayTemp[1].toInt().toString() + "°"
-            binding.temp2.visibility = View.VISIBLE
+            binding.root.hour2.text = hourlyList[1]
+            binding.root.hour2.visibility = View.VISIBLE
+            binding.root.temp2.text = dayTemp[1].toInt().toString() + "°"
+            binding.root.temp2.visibility = View.VISIBLE
+            binding.root.hourIcon2.visibility = View.VISIBLE
         }
         if (hourlyList.size >= 3) {
-            binding.hour3.text = hourlyList[2]
-            binding.hour3.visibility = View.VISIBLE
-            binding.temp3.text = dayTemp[2].toInt().toString() + "°"
-            binding.temp3.visibility = View.VISIBLE
+            binding.root.hour3.text = hourlyList[2]
+            binding.root.hour3.visibility = View.VISIBLE
+            binding.root.temp3.text = dayTemp[2].toInt().toString() + "°"
+            binding.root.temp3.visibility = View.VISIBLE
+            binding.root.hourIcon3.visibility = View.VISIBLE
         }
     }
 
@@ -188,29 +202,32 @@ class WeatherActivity : BaseActivity() {
             Log.d("WeatherAct", "bindWeatherData:" + entry.key)
             if (!isDay1Present) {
                 isDay1Present = true
-                binding.day1.text = entry.key
+                binding.root.day1.text = entry.key
 
                 dayWiseData(map[entry.key]!!.toList())
             } else if (!isDay2Present) {
                 isDay2Present = true
-                binding.day2.text = entry.key
+                binding.root.day2.text = entry.key
             } else if (!isDay3Present) {
                 isDay3Present = true
-                binding.day3.text = entry.key
+                binding.root.day3.text = entry.key
             } else if (!isDay4Present) {
                 isDay4Present = true
-                binding.day4.text = entry.key
+                binding.root.day4.text = entry.key
             } else if (!isDay5Present) {
                 isDay5Present = true
-                binding.day5.text = entry.key
+                binding.root.day5.text = entry.key
             } else if (!isDay6Present) {
                 isDay6Present = true
-                binding.day6.text = entry.key
+                binding.root.day6.text = entry.key
             }
         }
     }
 
-    private fun mappingDayWiseWeatherData(list: List<WeatherItem>, map: MutableMap<String, MutableList<WeatherItem>>) {
+    private fun mappingDayWiseWeatherData(
+        list: List<WeatherItem>,
+        map: MutableMap<String, MutableList<WeatherItem>>
+    ) {
         for (item in list) {
 
             val formattedDate = convertDateFormat("yyyy-MM-dd hh:mm:ss", item.dtTxt, "E dd/MM")
@@ -218,9 +235,9 @@ class WeatherActivity : BaseActivity() {
             if (map[formattedDate].isNullOrEmpty()) {
                 map[formattedDate] = mutableListOf(item)
             } else {
-                val list = map[formattedDate]!!
-                list.add(item)
-                map[formattedDate] = list
+                val oldlist = map[formattedDate]!!
+                oldlist.add(item)
+                map[formattedDate] = oldlist
             }
         }
     }
@@ -407,7 +424,7 @@ class WeatherActivity : BaseActivity() {
 
     private fun setUpLocationListener() {
         val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-        // for getting the current location update after every 2 seconds with high accuracy
+        // for getting the current location update after every 10 seconds with high accuracy
         val locationRequest = LocationRequest().setInterval(10000).setFastestInterval(10000)
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
         if (ActivityCompat.checkSelfPermission(
