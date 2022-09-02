@@ -55,13 +55,13 @@ class WeathersViewModelTest {
         val weathersModel = testModelsGenerator.generateWeathers()
 
         //1- Mock calls
-        coEvery { dataRepository.requestWeathers() } returns flow {
+        coEvery { dataRepository.requestWeathers(28.459497,77.026634) } returns flow {
             emit(Resource.Success(weathersModel))
         }
 
         //2-Call
         weatherViewModel = WeatherViewModel(dataRepository)
-        weatherViewModel.getWeathers()
+        weatherViewModel.getWeathers(28.459497,77.026634)
         //active observer for livedata
         weatherViewModel.weathersLiveData.observeForever { }
 
@@ -77,13 +77,13 @@ class WeathersViewModelTest {
         val weathersModel = testModelsGenerator.generateWeathersModelWithEmptyList()
 
         //1- Mock calls
-        coEvery { dataRepository.requestWeathers() } returns flow {
+        coEvery { dataRepository.requestWeathers(28.459497,77.026634) } returns flow {
             emit(Resource.Success(weathersModel))
         }
 
         //2-Call
         weatherViewModel = WeatherViewModel(dataRepository)
-        weatherViewModel.getWeathers()
+        weatherViewModel.getWeathers(28.459497,77.026634)
         //active observer for livedata
         weatherViewModel.weathersLiveData.observeForever { }
 
@@ -99,13 +99,13 @@ class WeathersViewModelTest {
         val error: Resource<Weathers> = Resource.DataError(NETWORK_ERROR)
 
         //1- Mock calls
-        coEvery { dataRepository.requestWeathers() } returns flow {
+        coEvery { dataRepository.requestWeathers(28.459497,77.026634) } returns flow {
             emit(error)
         }
 
         //2-Call
         weatherViewModel = WeatherViewModel(dataRepository)
-        weatherViewModel.getWeathers()
+        weatherViewModel.getWeathers(28.459497,77.026634)
         //active observer for livedata
         weatherViewModel.weathersLiveData.observeForever { }
 
