@@ -16,8 +16,8 @@ android {
         targetSdk 33
         versionCode 1
         versionName "1.0"
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
+        testInstrumentationRunner "com.example.weatherapp.CustomTestRunner"
     }
     buildFeatures {
         viewBinding = true

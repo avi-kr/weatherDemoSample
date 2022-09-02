@@ -2,7 +2,7 @@ package com.example.weatherapp
 
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
-import com.example.weatherapp.data.dto.weathor.WeatherItem
+import com.example.weatherapp.data.dto.weathor.WeatherCity
 import com.example.weatherapp.data.dto.weathor.Weathers
 import com.example.weatherapp.data.remote.moshiFactories.MyKotlinJsonAdapterFactory
 import com.example.weatherapp.data.remote.moshiFactories.MyStandardJsonAdapters
@@ -19,20 +19,20 @@ import java.lang.reflect.Type
 object TestUtil {
 
     var dataStatus: DataStatus = DataStatus.Success
-    var weathers: Weathers = Weathers(arrayListOf())
+    var weathers: Weathers = Weathers(arrayListOf(), WeatherCity(""))
     fun initData(): Weathers {
         val moshi = Moshi.Builder()
             .add(MyKotlinJsonAdapterFactory())
             .add(MyStandardJsonAdapters.FACTORY)
             .build()
-        val type: Type = Types.newParameterizedType(List::class.java, WeatherItem::class.java)
-        val adapter: JsonAdapter<List<WeatherItem>> = moshi.adapter(type)
+        val type: Type = Types.newParameterizedType(Weathers::class.java, Weathers::class.java)
+        val adapter: JsonAdapter<Weathers> = moshi.adapter(type)
         val jsonString = getJson("WeathersApiResponse.json")
         adapter.fromJson(jsonString)?.let {
-            weathers = Weathers(ArrayList(it))
+            weathers = Weathers(ArrayList(it.list), it.city)
             return weathers
         }
-        return Weathers(arrayListOf())
+        return Weathers(arrayListOf(), WeatherCity(""))
     }
 
     private fun getJson(path: String): String {
