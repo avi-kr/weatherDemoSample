@@ -94,11 +94,11 @@ class WeatherActivity : BaseActivity() {
     }
 
     private fun showDataView(show: Boolean) {
-        binding.pbLoading.toGone()
+        binding.pbLoading.visibility = View.GONE
     }
 
     private fun bindWeatherData(weathers: Weathers) {
-        binding.pbLoading.toGone()
+        binding.pbLoading.visibility = View.GONE
 
         val weatherlist = weathers.list
 
@@ -424,8 +424,8 @@ class WeatherActivity : BaseActivity() {
 
     private fun setUpLocationListener() {
         val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-        // for getting the current location update after every 10 seconds with high accuracy
-        val locationRequest = LocationRequest().setInterval(10000).setFastestInterval(10000)
+        // for getting the current location update after every 100 seconds with high accuracy
+        val locationRequest = LocationRequest().setInterval(100000).setFastestInterval(100000)
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
         if (ActivityCompat.checkSelfPermission(
                 this,
