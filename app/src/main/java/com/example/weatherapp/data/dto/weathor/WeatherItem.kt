@@ -16,6 +16,7 @@ data class WeatherItem(
     val weather: List<WeatherCondition> = listOf(),
     val wind: WindCondition = WindCondition(),
     val visibility: String,
+    val pop: String,
     @Json(name = "dt_txt")
     val dtTxt: String
 ) : Parcelable
@@ -23,6 +24,10 @@ data class WeatherItem(
 @Parcelize
 data class MainWeatherItem(
     val temp: String = "",
+    @Json(name = "temp_min")
+    val tempMin: String = "",
+    @Json(name = "temp_max")
+    val tempMax: String = "",
     val humidity: String = "",
     val pressure: String = ""
 ) : Parcelable

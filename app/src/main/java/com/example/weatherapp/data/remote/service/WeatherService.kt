@@ -8,6 +8,6 @@ import retrofit2.http.GET
 
 interface WeatherService {
 
-    @GET("forecast?lat=28.459497&lon=77.026634&appid=$WEATHER_KEY")
+    @GET("forecast?lat=28.459497&lon=77.026634&appid=$WEATHER_KEY&units=metric")
     suspend fun fetchWeathers(): Response<Weathers>
 }
